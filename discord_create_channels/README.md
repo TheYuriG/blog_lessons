@@ -81,3 +81,49 @@ module.exports = {
 Deploying this command, refreshing your client, and triggering the command will always create a new channel called "new". But that's not very versatile, is it? Let's tweak the code a bit so we can choose what name we want to give the channel now.
 
 ## Creating a text channel with a dynamic name
+
+To be able to set the name from the command itself, we need to tweak the code a little, add options to the command, and then retrieve the name provided by the user in our file.
+
+```js
+data: new SlashCommandBuilder()
+	.setName('createchannel')
+	.setDescription('Creates a new text channel')
+	// Text channel name
+	.addStringOption((option) =>
+		option
+			.setName('channelname') // option names need to always be lowercase and have no spaces
+			.setDescription('Choose the name to give to the channel')
+			.setMinLength(1) // A text channel needs to be named
+			.setMaxLength(25) // Discord will cut-off names past the 25 characters,
+			// so that's a good hard limit to set. You can manually increase this if you wish
+			.setRequired(true)
+	)
+
+// ...
+// permissions aren't changed, neither our interaction reply
+// ...
+
+    // After acknowledging the interaction, we retrieve the string sent by the user
+    const chosenChannelName = interaction.options.getString('channelname');
+    // Do note that the string passed to the method .getString() needs to
+    // match EXACTLY the name of the option provided (line 12 in this file).
+    // If it's not a perfect match, this will always return null
+
+    try {
+        // Now create the channel in the server.
+        await interaction.guild.channels.create({
+            name: chosenChannelName, // The name given to the channel by the user
+            type: ChannelType.GuildText, // The type of the channel created.
+            // Since "text" is the default channel created, this could be ommitted
+        });
+
+// ...
+// the rest of the code remains unchanged
+// ...
+```
+
+[_createchannel.js_](https://github.com/TheYuriG/blog_lessons/blob/master/discord_create_channels/commands/createchannel.js)
+
+A small note here: [Discord has a visual limit of around 25 characters for channels on the sidebar](https://discord.com/moderation/208-channel-categories-and-names), but they don't define an actual hard limit for channel names and expect users to have common sense. If you choose to override the 25-character limit in line 15, please ensure there is another limit in place to stop users from creating absurdly long channel names. [Avoid giving them enough rope to hang themselves](https://www.collinsdictionary.com/dictionary/english/give-someone-enough-rope-to-hang-himself-or-herself).
+
+After saving your file, reloading your bot, and redeploying your commands, you now have a command that can quickly create a new text channel. Neat, huh? But we are still creating stray channels at the top of the channel list. Let's change that now.
