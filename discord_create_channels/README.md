@@ -329,3 +329,105 @@ Alright, few key points with this code:
 -   We also handle the case that the user might not want to create a thread on the message itself, so an orphaned thread is created in the channel where the command was used instead.
 
 Just like with the checks for messages belonging to categories in the previous lesson, here we also make polar opposite checks (lines 42 and 52; lines 55 and 83; lines 58 and 70) where we could instead use else or nothing at all, considering the previous check already calls return on a positive result. **Feel free to tweak this in your own code, these additional checks are only there for educational purposes.**
+
+## Create a voice channel that is nested in the parent category (when there is one)
+
+Creating a voice channel isn't that much different than creating a text channel. Voice channels won't get their names normalized to lowercase and have their spaces replaced by dashes, so whatever you write will be what will be used. Because of how similar Voice and Text channels are, we can reuse most of the code we used for the text channel and make small adjustments.
+
+```js
+// Importing SlashCommandBuilder is required for every slash command
+// We import PermissionFlagsBits so we can restrict this command usage
+// We also import ChannelType to define what kind of channel we are creating
+const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
+module.exports = {
+	data: new SlashCommandBuilder()
+		.setName('createvoicechannel') // Command name matching file name
+		.setDescription('Creates a new voice channel')
+		// Voice channel name
+		.addStringOption((option) =>
+			option
+				.setName('voicechannelname') // option names need to always be lowercase and have no spaces
+				.setDescription('Choose the name to give to the voice channel')
+				.setMinLength(1) // A voice channel needs to be named
+				.setMaxLength(25) // Discord will cut-off names past the 25 characters,
+				// so that's a good hard limit to set. You can manually increase this if you wish
+				.setRequired(true)
+		)
+		// You will usually only want users that can create new channels to
+		// be able to use this command and this is what this line does.
+		// Feel free to remove it if you want to allow any users to
+		// create new channels
+		.setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
+		// It's impossible to create voice channels inside DMs, so
+		// it's in your best interest in disabling this command through DMs
+		.setDMPermission(false),
+	async execute(interaction) {
+		// Before executing any other code, we need to acknowledge the interaction.
+		// Discord only gives us 3 seconds to acknowledge an interaction before
+		// the interaction gets voided and can't be used anymore.
+		await interaction.reply({
+			content: 'Fetched all input and working on your request!',
+		});
+
+		// After acknowledging the interaction, we retrieve the string sent by the user
+		const chosenVoiceChannelName = interaction.options.getString('voicechannelname');
+		// Do note that the string passed to the method .getString() needs to
+		// match EXACTLY the name of the option provided (line 12 in this file).
+		// If it's not a perfect match, this will always return null
+
+		try {
+			// Check if this channel where the command was used is stray
+			if (!interaction.channel.parent) {
+				// If the channel where the command was used is stray,
+				// create another stray voice channel in the server.
+				await interaction.guild.channels.create({
+					name: chosenVoiceChannelName, // The name given to the channel by the user
+					type: ChannelType.GuildVoice, // The type of the channel created.
+				});
+				// Notice how we are creating a channel in the list of channels
+				// of the server. This will cause the channel to spawn at the top
+				// of the channels list, without belonging to any categories
+
+				// If we managed to create the channel, edit the initial response with
+				// a success message
+				await interaction.editReply({
+					content: 'Your voice channel was successfully created!',
+				});
+				return;
+			}
+
+			// Check if this channel where the command was used belongs to a category
+			if (interaction.channel.parent) {
+				// If the channel where the command belongs to a category,
+				// create another channel in the same category.
+				await interaction.channel.parent.children.create({
+					name: chosenVoiceChannelName, // The name given to the channel by the user
+					type: ChannelType.GuildVoice, // The type of the channel created.
+				});
+
+				// If we managed to create the channel, edit the initial response with
+				// a success message
+				await interaction.editReply({
+					content: 'Your voice channel was successfully created in the same category!',
+				});
+				return;
+			}
+		} catch (error) {
+			// If an error occurred and we were not able to create the channel
+			// the bot is most likely received the "Missing Permissions" error.
+			// Log the error to the console
+			console.log(error);
+			// Also inform the user that an error occurred and give them feedback
+			// about how to avoid this error if they want to try again
+			await interaction.editReply({
+				content:
+					'Your voice channel could not be created! Please check if the bot has the necessary permissions!',
+			});
+		}
+	},
+};
+```
+
+[_createvoicechannel.js_](https://github.com/TheYuriG/blog_lessons/blob/master/discord_create_channels/commands/createvoicechannel.js)
+
+A few tweaks were made, variables were renamed, comments were updated, and error messages were updated, but the process isn't much different from creating a text channel. One of the few features that Voice Channels have over Text Channels is the ability to limit the number of users it can hold at once. Let's tweak that now?
