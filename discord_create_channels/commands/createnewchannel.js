@@ -4,7 +4,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('createnewchannel')
+		.setName('createnewchannel') // Command name matching file name
 		.setDescription('Ths command creates a text channel called "new"')
 		// You will usually only want users that can create new channels to
 		// be able to use this command and this is what this line does.

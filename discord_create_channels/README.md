@@ -21,7 +21,7 @@ Let's start with your basic file. I'll not have options added as I'm not assumin
 // Importing SlashCommandBuilder is required for every slash command
 // We import PermissionFlagsBits so we can restrict this command usage
 // We also import ChannelType to define what kind of channel we are creating
-const { SlashCommandBuilder, ChannelType } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('createnewchannel') // Command name matching file name

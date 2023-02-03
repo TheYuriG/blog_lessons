@@ -4,7 +4,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('createchannel')
+		.setName('createchannel') // Command name matching file name
 		.setDescription('Creates a new text channel')
 		// Text channel name
 		.addStringOption((option) =>
