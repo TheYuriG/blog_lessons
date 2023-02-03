@@ -86,7 +86,7 @@ To be able to set the name from the command itself, we need to tweak the code a 
 
 ```js
 data: new SlashCommandBuilder()
-	.setName('createchannel')
+	.setName('createchannel') // Command name matching file name
 	.setDescription('Creates a new text channel')
 	// Text channel name
 	.addStringOption((option) =>
@@ -127,3 +127,76 @@ data: new SlashCommandBuilder()
 A small note here: [Discord has a visual limit of around 25 characters for channels on the sidebar](https://discord.com/moderation/208-channel-categories-and-names), but they don't define an actual hard limit for channel names and expect users to have common sense. If you choose to override the 25-character limit in line 15, please ensure there is another limit in place to stop users from creating absurdly long channel names. [Avoid giving them enough rope to hang themselves](https://www.collinsdictionary.com/dictionary/english/give-someone-enough-rope-to-hang-himself-or-herself).
 
 After saving your file, reloading your bot, and redeploying your commands, you now have a command that can quickly create a new text channel. Neat, huh? But we are still creating stray channels at the top of the channel list. Let's change that now.
+
+## Create a channel that is nested in the parent category (when there is one)
+
+More experienced Discord users won't be expecting the newly created channel to appear on the top of the channel list, but instead, to be within the same category of the channel they used the command in. We will now be tweaking our code to create channels with that behavior whenever the server has Categories set up, but still, be able to create stray channels if the command was used in a channel that isn't nested in a category.
+
+```js
+// ...
+// no code changes prior to the try catch block, except for command name update
+// ...
+
+try {
+    // Check if this channel where the command was used is stray
+    if (!interaction.channel.parent) {
+        // If the channel where the command was used is stray,
+        // create another stray channel in the server.
+        await interaction.guild.channels.create({
+            name: chosenChannelName, // The name given to the channel by the user
+            type: ChannelType.GuildText, // The type of the channel created.
+            // Since "text" is the default channel created, this could be ommitted
+        });
+        // Notice how we are creating a channel in the list of channels
+        // of the server. This will cause the channel to spawn at the top
+        // of the channels list, without belonging to any categories (more on that later)
+
+        // If we managed to create the channel, edit the initial response with
+        // a success message
+        await interaction.editReply({
+            content: 'Your channel was successfully created!',
+        });
+        return;
+    }
+
+    // Check if this channel where the command was used belongs to a category
+    if (interaction.channel.parent) {
+        // If the channel where the command belongs to a category,
+        // create another channel in the same category.
+        await interaction.channel.parent.children.create({
+            name: chosenChannelName, // The name given to the channel by the user
+            type: ChannelType.GuildText, // The type of the channel created.
+            // Since "text" is the default channel created, this could be ommitted
+        });
+
+        // If we managed to create the channel, edit the initial response with
+        // a success message
+        await interaction.editReply({
+            content: 'Your channel was successfully created in the same category!',
+        });
+        return;
+    }
+} catch (error) {
+
+// ...
+// no code changes past this point
+// ...
+```
+
+[_createchannelincategory.js_](https://github.com/TheYuriG/blog_lessons/blob/master/discord_create_channels/commands/createchannelincategory.js)
+
+Let's go through this bit by bit.
+
+> _if (!interaction.channel.parent) { (line 45)_
+
+First, we are checking if the channel where the command was used doesn't have a [parent](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel), which would mean they are not nested within a category. If this check succeeds, then this is a stray channel and we can reuse our previous code to create another stray channel. Do note that we end this if check with a return statement. More on that is below.
+
+> _if (interaction.channel.parent) { (line 66)_
+
+Now we are checking if the channel where the command was used does have a [parent](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel), meaning they are nested in a category. This could very much be an _else_ block or removed entirely, since the previous _if check_ ends with a _return_ statement. **Feel free to tweak this in your code yourself, the check is only there for educational purposes.**
+
+> _await interaction.channel.parent.children.create({ (line 69)_
+
+Since the channel where the command was used does have a [parent](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel), we need to create our channel inside that same category. For that, we need to first access the [children](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannelChildManager) of that category and then create our channel within.
+
+Now that we are handling both cases for stray channels and nested channels, let's switch gears for a moment and talk about Threads before we proceed to Voice Channels, Categories, and Roles.
