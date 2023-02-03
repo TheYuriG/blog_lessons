@@ -1,0 +1,17 @@
+{
+  "name": "blog_lessons",
+  "version": "1.0.0",
+  "description": "Repository for blog lessons. Useful to quickly copy files to your own projects.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "blogging",
+    "lessons",
+    "open",
+    "source"
+  ],
+  "author": "TheYuriG",
+  "license": "ISC"
+}
