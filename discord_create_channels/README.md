@@ -431,3 +431,59 @@ module.exports = {
 [_createvoicechannel.js_](https://github.com/TheYuriG/blog_lessons/blob/master/discord_create_channels/commands/createvoicechannel.js)
 
 A few tweaks were made, variables were renamed, comments were updated, and error messages were updated, but the process isn't much different from creating a text channel. One of the few features that Voice Channels have over Text Channels is the ability to limit the number of users it can hold at once. Let's tweak that now?
+
+## Create a voice channel that has a maximum number of concurrent users
+
+One of the exclusive features that voice channels have over other channels is the ability to limit the number of users that can use it at the same time. To set this number, all you gotta do is pass in an integer for the userLimit key when creating a voice channel.
+
+```js
+// ...
+// initial code unchanged
+// ...
+
+  // Voice channel limit of participants
+.addIntegerOption(
+    (option) =>
+        option
+            .setName('voiceuserlimit') // option names need to always be lowercase and have no spaces
+            .setDescription(
+                'Select the maximum number of concurrent users for the voice channel'
+            )
+            .setMinValue(2) // A voice channel with less than 2 users will be useless
+            // for nearly every case, so we will disable users from creating voice
+            // channels that can take less than that
+            .setRequired(false)
+)
+
+// ...
+// code in between unchanged
+// ...
+
+    // After acknowledging the interaction, we retrieve the input sent by the user
+    const chosenVoiceChannelName = interaction.options.getString('voicechannelname');
+    const voiceChannelUserLimit = interaction.options.getInteger('voiceuserlimit') ?? undefined;
+
+// ...
+// code in between unchanged
+// ...
+
+    name: chosenVoiceChannelName, // The name given to the channel by the user
+    type: ChannelType.GuildVoice, // The type of the channel created.
+    userLimit: voiceChannelUserLimit, // The max number of concurrent users
+
+// ...
+// rest of the code unchanged
+// ...
+```
+
+[_createvoicewithuserlimit.js_](https://github.com/TheYuriG/blog_lessons/blob/master/discord_create_channels/commands/createvoicewithuserlimit.js)
+
+There are a few key points that need to be talked about. The first of them is that we are not requiring the limit to be set (line 30). This allows the user to set a limit if they want but also allows the channel to be unlimited if they don't.
+
+> _const voiceChannelUserLimit = interaction.options.getInteger('voiceuserlimit') ?? undefined;_
+
+To avoid this causing an error when creating the voice channel, we check (in line 49) if a value was passed and, if .getInteger() returns us null, then we set the value to undefined.
+
+> _userLimit: voiceChannelUserLimit_
+
+Passing this to the [userLimit](https://discord.js.org/#/docs/discord.js/main/typedef/GuildChannelCreateOptions) key when creating a voice channel will make it unlimited, while any integer would be used as the actual limit.
