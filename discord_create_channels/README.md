@@ -482,7 +482,7 @@ There are a few key points that need to be talked about. The first of them is th
 
 > _const voiceChannelUserLimit = interaction.options.getInteger('voiceuserlimit') ?? undefined;_
 
-To avoid this causing an error when creating the voice channel, we check (in line 49) if a value was passed and, if .getInteger() returns us null, then we set the value to undefined.
+To avoid this causing an error when creating the voice channel, we check (in line 49) if a value was passed and, if .getInteger() returns us null, then then the [Javascript Nullish Coalescence](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing) operator "??" will set the value to undefined.
 
 > _userLimit: voiceChannelUserLimit_
 
