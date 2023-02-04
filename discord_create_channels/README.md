@@ -563,4 +563,110 @@ module.exports = {
 
 To create a role, you need to access the [roles](https://discord.js.org/#/docs/discord.js/main/class/RoleManager) of a server and then create a new role there. Creating a role can take some additional [configuration](https://discord.js.org/#/docs/discord.js/main/typedef/RoleCreateOptions), but all settings are optional (a role with no configuration will be called "new role" and have no color). As in previous lessons, we create a role that has a name provided by the user and, after that role is created, we edit the initial message with a success message (line 46).
 
-Now that we know how to create a role, how about we also learn how to create a role that has a color and that you can add to a member?
+Now that we know how to create a role, how about we learn how to create a colored role?
+
+## Creating a colored role
+
+Discord roles can have any color you want. Discord even provides us with some colors themselves that they have standardized. We will both offer to use Discord's standard color selection, while also allowing users to customize exactly the color they want for the role.
+
+```js
+// ...
+// initial code unchanged
+// ...
+
+// Role color options using Discord's defaults
+.addStringOption((option) =>
+    option
+        .setName('rolecolor')
+        .setDescription('Select a color for your role (using Discord defaults)')
+        .addChoices(
+            { name: 'Aqua', value: '0x1abc9c' },
+            { name: 'Green', value: '0x57f287' },
+            { name: 'Blue', value: '0x3498db' },
+            { name: 'Yellow', value: '0xfee75c' },
+            { name: 'LuminousVividPink', value: '0xe91e63' },
+            { name: 'Fuchsia', value: '0xeb459e' },
+            { name: 'Gold', value: '0xf1c40f' },
+            { name: 'Orange', value: '0xe67e22' },
+            { name: 'Red', value: '0xed4245' },
+            { name: 'Grey', value: '0x95a5a6' },
+            { name: 'Navy', value: '0x34495e' },
+            { name: 'DarkAqua', value: '0x11806a' },
+            { name: 'DarkGreen', value: '0x1f8b4c' },
+            { name: 'DarkBlue', value: '0x206694' },
+            { name: 'DarkPurple', value: '0x71368a' },
+            { name: 'DarkVividPink', value: '0xad1457' },
+            { name: 'DarkGold', value: '0xc27c0e' },
+            { name: 'DarkOrange', value: '0xa84300' },
+            { name: 'DarkRed', value: '0x992d22' },
+            { name: 'DarkerGrey', value: '0x7f8c8d' },
+            { name: 'LightGrey', value: '0xbcc0c0' },
+            { name: 'DarkNavy', value: '0x2c3e50' },
+            { name: 'Blurple', value: '0x5865f2' },
+            { name: 'Greyple', value: '0x99aab5' },
+            { name: 'DarkButNotBlack', value: '0x2c2f33' }
+        )
+    )
+// Role color options using a hex code or integer
+// relevant link for hex codes: https://www.rapidtables.com/web/color/RGB_Color.html
+.addStringOption((option) =>
+    option
+        .setName('customrolecolor')
+        .setDescription(
+            'Select a custom color for your role (hex code only. overrides "rolecolor")'
+        )
+        .setMinLength(8)
+        .setMaxLength(8)
+    )
+
+// ...
+// code in between unchanged
+// ...
+
+const chosenRoleName = interaction.options.getString('rolename');
+const chosenRoleColor =
+    interaction.options.getString('customrolecolor') ??
+    interaction.options.getString('rolecolor') ??
+    undefined;
+
+// ...
+// code in between unchanged
+// ...
+
+name: chosenRoleName,
+color: chosenRoleColor,
+
+// ...
+// rest of the code unchanged
+// ...
+```
+
+[_createcoloredrole.js_](https://github.com/TheYuriG/blog_lessons/blob/master/discord_create_channels/commands/createcoloredrole.js)
+
+Once again, let's go through each bit of code individually.
+
+> _.setName('rolecolor') (line 20)_
+
+The first of the [options](https://discord.js.org/#/docs/discord.js/main/typedef/RoleCreateOptions) we added is _rolecolor_. This option has 25 choices with colors that were standardized by Discord on their role color selection and their brand color palette. This is the easiest way for users to pick a color without needing to find a specific hex code.
+
+> _.setName('customrolecolor') (line 54)_
+
+The second [option](https://discord.js.org/#/docs/discord.js/main/typedef/RoleCreateOptions) we added is _customrolecolor_. This allows users to create a role with ANY color they want, by using a hex code. There are various websites that can be used to get a hex code from a color. The one I've been using for years is [RapidTables](https://www.rapidtables.com/web/color/RGB_Color.html).
+
+> _.setMinLength(8)
+> .setMaxLength(8) (lines 58 and 59)_
+
+You might have noticed that we have those strict limiters in place. This is because every RGB hex code has exactly 8 digits, the first two being "0x" which identifies that the following digits are a hexadecimal number. The next two digits are responsible for the Red, the 5th and 6th digits are responsible for the Green and the last 2 digits are responsible for the Blue.
+
+> _const chosenRoleColor =
+> interaction.options.getString('customrolecolor') ??
+> interaction.options.getString('rolecolor') ??
+> undefined; (lines 79 to 82)_
+
+If you noticed that we mention that _customrolecolor_ overrides _rolecolor_ on line 56, this is the reason why. Since a single role can't have two colors, we need to prioritize one of the inputs over the other and since it takes more effort to find a custom RGB hex code, we will assume that the user would rather use that color instead, in case they picked a _rolecolor_ by mistake (or intentionally, since some users enjoy trying to break things just because they can). Here we use the [Javascript Nullish Coalescing](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing) operator "??" to check if the user provided any custom value. If they didn't, then we check if they picked one of Discord's standard colors. If they also didn't, then we set the color as _undefined_, so a colorless role can be created as the default fallback.
+
+> _color: chosenRoleColor, (line 91)_
+
+Finally, we use either the _customrolecolor_ or the _rolecolor_ or _undefined_ to set the color (or no color) for the role we will be creating.
+
+Now we have a role and the role can have a color, but what's the use of a role that no one possesses? Let's grant this role to some users.
