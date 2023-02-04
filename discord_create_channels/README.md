@@ -670,3 +670,124 @@ If you noticed that we mention that _customrolecolor_ overrides _rolecolor_ on l
 Finally, we use either the _customrolecolor_ or the _rolecolor_ or _undefined_ to set the color (or no color) for the role we will be creating.
 
 Now we have a role and the role can have a color, but what's the use of a role that no one possesses? Let's grant this role to some users.
+
+## Creating a role and then granting it to members
+
+Granting a role to a member is very simple, you just need to access their [roles](https://discord.js.org/#/docs/discord.js/main/class/GuildMemberManager?scrollTo=addRole) and then add the [role](https://discord.js.org/#/docs/discord.js/main/typedef/AddOrRemoveGuildMemberRoleOptions). Let's take a look at what that code would look like.
+
+```js
+// ...
+// initial code unchanged
+// ...
+
+// Member that should get the role
+.addMemberOption((option) =>
+    option
+        .setName('membertoreceiverole')
+        .setDescription('The user you want to give the newly created role to')
+        .setRequired(true)
+    )
+// Grant role to the member using the command
+.addBooleanOption((option) =>
+    option
+        .setName('grantroletocommanduser') // option names need to always be lowercase and have no spaces
+        .setDescription('Choose you should be granted the role after creation')
+    )
+
+// ...
+// code in between unchanged
+// ...
+
+const chosenRoleColor =
+    interaction.options.getString('customrolecolor') ??
+    interaction.options.getString('rolecolor') ??
+    undefined;
+const memberNeedingRole = interaction.options.getMember('membertoreceiverole');
+const grantRoleToSelf = interaction.options.getBoolean('grantroletocommanduser') ?? false;
+
+// ...
+// code in between unchanged
+// ...
+
+// Check if the user selected "True" to the option to grant role to self
+if (grantRoleToSelf == true) {
+    // If they did, navigate their properties until their roles and
+    // add the newly created role to them
+    await interaction.member.roles.add(coloredRole).catch((e) => {
+        // If it fails, send a followUp message with the error
+        interaction.followUp({
+            content:
+                'Failed to give you the new role. Do you have any roles with higher priority than me?',
+            ephemeral: true,
+        });
+    });
+}
+
+// Check if a guild member was provided to receive the role
+if (memberNeedingRole != null) {
+    // Check if the command user requested to get the role
+    // and also provided their own member to receive the role
+    if (interaction.member.id === memberNeedingRole.id && grantRoleToSelf == true) {
+        // If they did, give them an ephemeral error message
+        interaction.followUp({
+            content: 'You were already granted the role!',
+            ephemeral: true,
+        });
+    }
+
+    // Check if the command user provided a different member
+    // than themselves to receive the role
+    if (interaction.member.id !== memberNeedingRole.id || grantRoleToSelf == false) {
+        // If they did, navigate their properties until their roles and
+        // add the newly created role to them
+        await memberNeedingRole.roles.add(coloredRole).catch((e) => {
+            // If it fails, send a followUp message with the error
+            interaction.followUp({
+                content:
+                    'Failed to give the new role to the member. Do they have any roles with higher priority than me?',
+            });
+        });
+    }
+}
+
+// ...
+// rest of the code unchanged
+// ...
+```
+
+[_createandgrantrole.js_](https://github.com/TheYuriG/blog_lessons/blob/master/discord_create_channels/commands/createandgrantrole.js)
+
+Let's break down this code into smaller chunks again.
+
+> _// Member that should get the role
+> .addMemberOption((option) => (lines 61 and 62)_
+
+This option allows the user to select a member that will receive the role, once it has been created. This will not ping them or notify them in any way.
+
+> _// Grant role to the member using the command
+> .addBooleanOption((option) => (lines 68 and 69)_
+
+This option was added to allow the person using the command to get the role added to them after being created if they select true when using the command.
+
+> _const memberNeedingRole = interaction.options.getMember('membertoreceiverole');
+> const grantRoleToSelf = interaction.options.getBoolean('grantroletocommanduser') ?? false (lines 96 and 97)_
+
+Fetches the user input from the options mentioned above. Note how grantRoleToSelf will default to false if the user doesn't select an option. This means that the only way for the user to be granted the role they have created is by manually selecting true when using the command.
+
+> _if (grantRoleToSelf == true) { (line 110)_
+
+Checks if the user requested to give themselves the role after creation and, if they did, attempt to give it to them. This, just like giving a role to any member, is prone to fail if the bot doesn't have permission to Manage Members or if the member that we are trying to give the role already has another role that has higher priority than the all of bot's roles.
+
+> _if (memberNeedingRole != null) { (line 124)_
+
+Check if the user provided us with a member to give the role.
+
+> _if (interaction.member.id === memberNeedingRole.id && grantRoleToSelf == true) { (line 127)_
+
+Check if the member provided is the same person as the user that triggered the command and if they have previously asked to receive the role. This will only give them an error message if they asked for the role twice, otherwise, it will just give them the role.
+
+> _if (interaction.member.id !== memberNeedingRole.id || grantRoleToSelf == false) { (line 137)_
+
+If the member provided is different than the user triggering the command or if a member was provided and the user didn't request to have the role added to themselves with the other option, grant the member to have the role.
+
+That was quite a bit of code we added and with that, we have also covered an edge case where users can try to give themselves the same role twice. Roles are very complex entities and there is a lot more that can be done with them, like setting up additional permissions and updating them post-creation, but that's a lesson for another day. Let's switch gears for a moment and talk about Categories again.
