@@ -488,6 +488,53 @@ To avoid this causing an error when creating the voice channel, we check (in lin
 
 Passing _undefined_ to the [userLimit](https://discord.js.org/#/docs/discord.js/main/typedef/GuildChannelCreateOptions) key when creating a voice channel will make it unlimited, while any integer would be used as the actual limit.
 
+## Creating Categories
+
+As mentioned in the previous lessons, Categories are the parents of some channels. Not all channels belong to a Category (the ones that don't, are referred to here as "stray channels").
+
+Categories exist for primarily two reasons: Organizing channels within a certain topic and quickly syncing the permissions of all channels within it. They also are very simple to create, even simpler than Voice Channels or Text Channels, since the number of configuration options for them is so limited.
+
+Let's modify the Text Channel file a bit and then talk about the differences between them and Categories:
+
+```js
+// ...
+// initial code unchanged
+// ...
+
+.addStringOption((option) =>
+    option
+        .setName('categoryname') // option names need to always be lowercase and have no spaces
+        .setDescription('Choose the name to give to the category')
+        .setMinLength(1) // A category needs to be named
+        .setMaxLength(25) // Discord will cut-off names past the ~27 characters (for categories),
+        // so that's a good hard limit to set. You can manually increase this if you wish
+        .setRequired(true)
+)
+
+// ...
+// code in between unchanged
+// ...
+
+const chosenCategoryName = interaction.options.getString('categoryname');
+
+// ...
+// code in between unchanged
+// ...
+
+await interaction.guild.channels.create({
+    name: chosenCategoryName, // The name given to the channel by the user
+    type: ChannelType.GuildCategory, // The type of the channel created.
+});
+
+// ...
+// rest of the code unchanged
+// ...
+```
+
+[_createcategory.js_](https://github.com/TheYuriG/blog_lessons/blob/master/discord_create_channels/commands/createcategory.js)
+
+As you probably noticed if you paid attention to the Text Channel with Dynamic Names lesson, not much was changed. We have renamed our variable, updated the command and the option name, and changed the type of channel being created to [GuildCategory](https://discord-api-types.dev/api/discord-api-types-v10/enum/ChannelType#GuildCategory). Simple, right? But there is not much use in having empty categories, so let's populate that our newly created category with some channels now.
+
 ## Creating a dynamic named role
 
 Creating roles, like threads, does not care about the channel or its categories. Roles also have many interesting properties that we can modify, like color. Let's tweak a little the code we used for creating a channel.
@@ -790,4 +837,4 @@ Check if the member provided is the same person as the user that triggered the c
 
 If the member provided is different than the user triggering the command or if a member was provided and the user didn't request to have the role added to themselves with the other option, grant the member to have the role.
 
-That was quite a bit of code we added and with that, we have also covered an edge case where users can try to give themselves the same role twice. Roles are very complex entities and there is a lot more that can be done with them, like setting up additional permissions and updating them post-creation, but that's a lesson for another day. Let's switch gears for a moment and talk about Categories again.
+That was quite a bit of code we added and with that, we have also covered an edge case where users can try to give themselves the same role twice. Roles are very complex entities and there is a lot more that can be done with them, like setting up additional permissions and updating them post-creation, but that's a lesson for another day.
