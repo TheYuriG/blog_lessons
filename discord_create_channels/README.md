@@ -13,6 +13,10 @@ First, this guide assumes you already have a bot set up, use slash command inter
 
 Second, this guide assumes you are using Javascript over Typescript. Feel free to use the documentation website (linked above) if you need assistance defining your types.
 
+Third, all code for the topics in these lessons will be available on this [GitHub repository](https://github.com/TheYuriG/blog_lessons/tree/master/discord_create_channels/commands). The code written is very verbose on purpose, as this article aims to help even the newest programmer to update their bot. You will see values being checked for true and then for false right after. This is intended because I want to make the code examples extremely clear and easy to understand for newer programmers. If you choose to copy my files and you are more experienced in writing Javascript, feel free to update the code as you see fit.
+
+Last, but not least, this article will briefly touch on the creation of certain Discord features, but will not dive deep into topics like editing a channel that already exists and setting permissions for channels. These topics can be used to write new Medium articles in the future if the interest is there. If you feel like you have some additional knowledge to share that can build on top of this article, feel free to visit the [GitHub repository page](https://github.com/TheYuriG/blog_lessons/tree/master/discord_create_channels/commands) and check the "How to contribute" section.
+
 ## Creating your first text channel
 
 Let's start with your basic file. I'll not have options added as I'm not assuming how configurable you will want to make this yet, but you can (and we will) add more options later.
@@ -533,7 +537,86 @@ await interaction.guild.channels.create({
 
 [_createcategory.js_](https://github.com/TheYuriG/blog_lessons/blob/master/discord_create_channels/commands/createcategory.js)
 
-As you probably noticed if you paid attention to the Text Channel with Dynamic Names lesson, not much was changed. We have renamed our variable, updated the command and the option name, and changed the type of channel being created to [GuildCategory](https://discord-api-types.dev/api/discord-api-types-v10/enum/ChannelType#GuildCategory). Simple, right? But there is not much use in having empty categories, so let's populate that our newly created category with some channels now.
+As you probably noticed if you paid attention to the Text Channel with Dynamic Names lesson, not much was changed. We have renamed our variable, updated the command and the option name, and changed the type of channel being created to [GuildCategory](https://discord-api-types.dev/api/discord-api-types-v10/enum/ChannelType#GuildCategory). Simple, right? But there is not much use in having empty categories, so let's populate our newly created category with some channels now.
+
+## Creating a category that nests other types of channels
+
+We have seen how to create Text and Voice Channels that can be nested in their existing parent Categories (when there is one), but now we are going to create a Category and immediately nest newly created Text Channels and Voice Channels within. As you can probably guess, we won't need to change a lot of our existing code, but we gonna reuse code from a few of our files to accomplish this.
+
+```js
+// ...
+// initial code unchanged
+// ...
+
+// Text channel name
+.addStringOption((option) =>
+    option
+        .setName('textchannelname') // option names need to always be lowercase and have no spaces
+        .setDescription('Choose the name to give to the text channel')
+        .setMinLength(1) // A text channel needs to be named
+        .setMaxLength(25) // Discord will cut-off names past the 25 characters,
+        // so that's a good hard limit to set. You can manually increase this if you wish
+        .setRequired(true)
+    )
+// Voice channel name
+.addStringOption((option) =>
+    option
+        .setName('voicechannelname') // option names need to always be lowercase and have no spaces
+        .setDescription('Choose the name to give to the voice channel')
+        .setMinLength(1) // A voice channel needs to be named
+        .setMaxLength(25) // Discord will cut-off names past the 25 characters,
+        // so that's a good hard limit to set. You can manually increase this if you wish
+        .setRequired(true)
+    )
+
+// ...
+// code in between unchanged
+// ...
+
+const chosenTextChannelName = interaction.options.getString('textchannelname');
+const chosenVoiceChannelName = interaction.options.getString('voicechannelname');
+
+// ...
+// code in between unchanged
+// ...
+
+// Now create the category in the server.
+const newlyCreatedCategory = await interaction.guild.channels.create({
+    name: chosenCategoryName, // The name given to the channel by the user
+    type: ChannelType.GuildCategory, // The type of the channel created.
+});
+
+// Now we create the text channel within the category we just created
+await newlyCreatedCategory.children.create({
+    name: chosenTextChannelName, // The name given to the channel by the user
+    type: ChannelType.GuildText, // The type of the channel created.
+    // Since "text" is the default channel created, this could be ommitted
+});
+
+// Lastly we create the voice channel within the same category
+await newlyCreatedCategory.children.create({
+    name: chosenVoiceChannelName, // The name given to the channel by the user
+    type: ChannelType.GuildVoice, // The type of the channel created.
+});
+
+// ...
+// rest of the code unchanged
+// ...
+```
+
+[_createcategorywithnestedchannels.js_](https://github.com/TheYuriG/blog_lessons/blob/master/discord_create_channels/commands/createcategorywithnestedchannels.js)
+
+You should be fairly familiar with what's happening here by this point if you have been following along. We are requiring the user to provide us a name for the Text Channel and the Voice Channel, we are then fetching that input and using it to create them nested within the Category we created. There are only two points that I think it's important to go through in more detail:
+
+> _const newlyCreatedCategory = await interaction.guild.channels.create({ (line 65)_
+
+We are now fetching the Category and storing it to a constant, so it can be used to nest the newly created Text and Voice Channels.
+
+> _await newlyCreatedCategory.children.create({ (lines 74 and 81)_
+
+Since we now have a Category, we don't need to transverse through the [interaction](https://discord.js.org/#/docs/discord.js/main/class/CommandInteraction), then the [guild](https://discord.js.org/#/docs/discord.js/main/class/Guild), and then the [channels](https://discord.js.org/#/docs/discord.js/main/class/GuildChannelManager) to create our channels, we can just use the [Category](https://discord-api-types.dev/api/discord-api-types-v10/enum/ChannelType#GuildCategory)'s [children](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannelChildManager) and nest our channels inside that.
+
+Not too bad, now isn't it? It's really helpful that all of Discord.JS documentation can easily point you in the right direction whenever you want/need to do something with the API. Now, before we wrap up this post, let's go through our final topic, and let's start creating some [Roles](https://discord.js.org/#/docs/discord.js/main/class/GuildMemberRoleManager).
 
 ## Creating a dynamic named role
 
