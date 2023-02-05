@@ -916,3 +916,22 @@ Check if the member provided is the same person as the user that triggered the c
 If the member provided is different than the user triggering the command or if a member was provided and the user didn't request to have the role added to themselves with the other [option](https://discord.js.org/#/docs/discord.js/main/typedef/CommandInteractionOption), grant the member to have the role.
 
 That was quite a bit of code we added and with that, we have also covered an edge case where users can try to give themselves the same role twice. Roles are very complex entities and there is a lot more that can be done with them, like setting up additional permissions and updating them post-creation, but that's a lesson for another day.
+
+### How to contribute
+
+The Discord.JS library is very vast and this guide doesn't cover 100% of everything it's possible do with it.
+
+There are a quite a few topic that are closely related to the lessons given here, like "editing a role/channel after it was created", "updating role permissions", "granting a role to multiple users at once" and many, many others.
+
+If you would like to contribute with writing your own lesson for any of the topics mentioned above or something else that is closely similar to what was taught here, feel free to create a PR with the full final code file to `./contributions/commands/` and an edit to the README.md in `./contributions/README.md`.
+
+If you are not sure if your topic is close enough to the topics written here, feel free to open an issue first, explaining what your PR intends to teach about and I'll take a look at it and give a reply as soon as possible. I intend to be as accepting as possible, as long as you don't go overboard like trying to teach people "How to Integrate ChatGPT with Discord" or "How to Create your Own Pokemon Game on Discord". The lessons here are meant to be very beginner friendly.
+
+If you are still reading at this point, I assume you are still interested in contributing, so here are the very simple rules:
+
+-   Write verbose code. Don't write codes with shortcuts.
+-   -   Avoid writing `if (!access) return`
+-   -   Prefer writing `if (access == false) {return}`
+-   -   Prefer writing complete functions over assigning anonymous functions to constants.
+-   -   -   Remember that the guides here aim to help beginners. It's easier to trim down code if you are experienced than to make it more verbose if you are a beginner.
+-   Write comments on everything. While more experienced programmers should strive for writing self-explaining code that doesn't require any comments, that often overwhelms new programmers.
