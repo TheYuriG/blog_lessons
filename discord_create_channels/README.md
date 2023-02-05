@@ -1,25 +1,25 @@
 # How to create Categories, Text Channels, Threads, Voice Channels, and Roles in Discord.JS v14
 
-Navigating through Discord.JS' guide and documentation can be confusing if you are new to programming, as many bot creators will also be learning how to code to create their bot (it was my first project too, back in 2018!). This README.md aims to simplify the learning process to make different types of channels from a slash command interaction.
+Navigating through [Discord.JS' guide](https://discordjs.guide/#before-you-begin) and [documentation](https://discord.js.org/#/docs/discord.js/main/general/welcome) can be confusing if you are new to programming, as many bot creators will also be learning how to code to create their bot (it was my first project too, back in 2018!). This README.md aims to simplify the learning process to make different types of channels from a slash command interaction.
 Before anything else, it's essential to share links to relevant resources used in this blog post:
 
 -   [Discord.JS' support server](https://discord.com/invite/djs)
 -   [Discord.JS' guide (currently at v14)](https://discordjs.guide/#before-you-begin)
 -   [Discord.JS' documentation (currently at v14)](https://discord.js.org/#/docs/discord.js/main/general/welcome)
 
-Remember that if you have any questions, _Google your issue first_, and, if you can't find the solution, join the support server (linked above) and ask for help in the proper v14 help channel.
+Remember that if you have any questions, **Google your issue first**, and, if you can't find the solution, join the [support server](https://discord.com/invite/djs) and ask for help in the proper v14 help channel.
 
-First, this guide assumes you already have a bot set up, use slash command interactions, you have a command handler set up and the command you are using was already deployed. You will need to update the code on your own if you are still using 'messageCreate' events instead.
+First, this guide assumes you already have a [bot set up](https://discordjs.guide/preparations/setting-up-a-bot-application.html), use [slash command interactions](https://discordjs.guide/creating-your-bot/slash-commands.html), you have a [command handler](https://discordjs.guide/creating-your-bot/command-handling.html) set up and the command you are using was already deployed. You will need to update the code on your own if you are still using `messageCreate` events instead.
 
-Second, this guide assumes you are using Javascript over Typescript. Feel free to use the documentation website (linked above) if you need assistance defining your types.
+Second, this guide assumes you are using Javascript over Typescript. Feel free to use the [documentation website](https://discord.js.org/#/docs/discord.js/main/general/welcome) if you need assistance defining your types.
 
-Third, all code for the topics in these lessons will be available on this [GitHub repository](https://github.com/TheYuriG/blog_lessons/tree/master/discord_create_channels/commands). The code written is very verbose on purpose, as this article aims to help even the newest programmer to update their bot. You will see values being checked for true and then for false right after. This is intended because I want to make the code examples extremely clear and easy to understand for newer programmers. If you choose to copy my files and you are more experienced in writing Javascript, feel free to update the code as you see fit.
+Third, all code for the topics in these lessons will be available on this [GitHub repository](https://github.com/TheYuriG/blog_lessons/tree/master/discord_create_channels/commands). The code written is very verbose on purpose, as this guide aims to help even the newest programmer to update their bot. You will see values being checked for `true` and then for `false` right after. This is intended because I want to make the code examples extremely clear and easy to understand for newer programmers. If you choose to copy my files and you are more experienced in writing Javascript, feel free to update the code and remove those additional checks.
 
-Last, but not least, this article will briefly touch on the creation of certain Discord features, but will not dive deep into topics like editing a channel that already exists and setting permissions for channels. These topics can be used to write new Medium articles in the future if the interest is there. If you feel like you have some additional knowledge to share that can build on top of this article, feel free to visit the [GitHub repository page](https://github.com/TheYuriG/blog_lessons/tree/master/discord_create_channels/commands) and check the "How to contribute" section.
+Last, but not least, this article will briefly touch on the creation of certain Discord features, but will not dive deep into topics like "editing an existing channel" or "setting permissions for channels". These topics can be used to write new guides in the future if the interest is there. If you feel like you have some additional knowledge to share that can build on top of this article, feel free to check the [How to contribute](#how-to-contribute) section.
 
 ## Creating your first text channel
 
-Let's start with your basic file. I'll not have options added as I'm not assuming how configurable you will want to make this yet, but you can (and we will) add more options later.
+Let's start with your basic file. We will not have [options](https://discord.js.org/#/docs/discord.js/main/typedef/CommandInteractionOption) added as I'm not assuming how configurable you want the commands to be, but you can (and we will) add more [options](https://discord.js.org/#/docs/discord.js/main/typedef/CommandInteractionOption) later.
 
 ```js
 // Importing SlashCommandBuilder is required for every slash command
@@ -82,47 +82,46 @@ module.exports = {
 
 [_createnewchannel.js_](https://github.com/TheYuriG/blog_lessons/blob/master/discord_create_channels/commands/createnewchannel.js)
 
-Deploying this command, refreshing your client, and triggering the command will always create a new channel called "new". But that's not very versatile, is it? Let's tweak the code a bit so we can choose what name we want to give the channel now.
+[Deploying this command](https://discordjs.guide/creating-your-bot/command-deployment.html#command-registration), refreshing your client, and triggering the command will always create a new channel called "new". But that's not very versatile, is it? Let's tweak the code a bit so we can choose what name we want to give the channel now.
 
 ## Creating a text channel with a dynamic name
 
-To be able to set the name from the command itself, we need to tweak the code a little, add options to the command, and then retrieve the name provided by the user in our file.
+To be able to set the name from the command itself, we need to tweak the code a little, add [options](https://discord.js.org/#/docs/discord.js/main/typedef/CommandInteractionOption) to the command, and then retrieve the name provided by the user in our file.
 
 ```js
-data: new SlashCommandBuilder()
-	.setName('createchannel') // Command name matching file name
-	.setDescription('Creates a new text channel')
-	// Text channel name
-	.addStringOption((option) =>
-		option
-			.setName('channelname') // option names need to always be lowercase and have no spaces
-			.setDescription('Choose the name to give to the channel')
-			.setMinLength(1) // A text channel needs to be named
-			.setMaxLength(25) // Discord will cut-off names past the 25 characters,
-			// so that's a good hard limit to set. You can manually increase this if you wish
-			.setRequired(true)
-	)
-
 // ...
-// permissions aren't changed, neither our interaction reply
+// initial code unchanged
 // ...
 
-    // After acknowledging the interaction, we retrieve the string sent by the user
-    const chosenChannelName = interaction.options.getString('channelname');
-    // Do note that the string passed to the method .getString() needs to
-    // match EXACTLY the name of the option provided (line 12 in this file).
-    // If it's not a perfect match, this will always return null
-
-    try {
-        // Now create the channel in the server.
-        await interaction.guild.channels.create({
-            name: chosenChannelName, // The name given to the channel by the user
-            type: ChannelType.GuildText, // The type of the channel created.
-            // Since "text" is the default channel created, this could be ommitted
-        });
+// Text channel name
+.addStringOption((option) =>
+	option
+		.setName('channelname') // option names need to always be lowercase and have no spaces
+		.setDescription('Choose the name to give to the channel')
+		.setMinLength(1) // A text channel needs to be named
+		.setMaxLength(25) // Discord will cut-off names past the 25 characters,
+		// so that's a good hard limit to set. You can manually increase this if you wish
+		.setRequired(true)
+)
 
 // ...
-// the rest of the code remains unchanged
+// code in between unchanged
+// ...
+
+const chosenChannelName = interaction.options.getString('channelname');
+
+// ...
+// code in between unchanged
+// ...
+
+await interaction.guild.channels.create({
+    name: chosenChannelName, // The name given to the channel by the user
+    type: ChannelType.GuildText, // The type of the channel created.
+    // Since "text" is the default channel created, this could be ommitted
+});
+
+// ...
+// rest of the code unchanged
 // ...
 ```
 
@@ -130,60 +129,58 @@ data: new SlashCommandBuilder()
 
 A small note here: [Discord has a visual limit of around 25 characters for channels on the sidebar](https://discord.com/moderation/208-channel-categories-and-names), but they don't define an actual hard limit for channel names and expect users to have common sense. If you choose to override the 25-character limit in line 15, please ensure there is another limit in place to stop users from creating absurdly long channel names. [Avoid giving them enough rope to hang themselves](https://www.collinsdictionary.com/dictionary/english/give-someone-enough-rope-to-hang-himself-or-herself).
 
-After saving your file, reloading your bot, and redeploying your commands, you now have a command that can quickly create a new text channel. Neat, huh? But we are still creating stray channels at the top of the channel list. Let's change that now.
+After saving your file, reloading your bot, and [redeploying your commands](https://discordjs.guide/creating-your-bot/command-deployment.html#command-registration), you now have a command that can quickly create a new text channel. Neat, huh? But we are still creating stray channels at the top of the channel list. Let's change that now.
 
 ## Create a channel that is nested in the parent category (when there is one)
 
-More experienced Discord users won't be expecting the newly created channel to appear on the top of the channel list, but instead, to be within the same category of the channel they used the command in. We will now be tweaking our code to create channels with that behavior whenever the server has Categories set up, but still, be able to create stray channels if the command was used in a channel that isn't nested in a category.
+More experienced Discord users won't be expecting the newly created channel to appear on the top of the channel list, but instead, to be within the same [category](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel) of the channel they used the command in. We will now be tweaking our code to create channels with that behavior whenever the server has [Categories](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel) set up, but still, be able to create stray channels if the command was used in a channel that isn't nested in a [category](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel).
 
 ```js
 // ...
-// no code changes prior to the try catch block, except for command name update
+// initial code unchanged
 // ...
 
-try {
-    // Check if this channel where the command was used is stray
-    if (!interaction.channel.parent) {
-        // If the channel where the command was used is stray,
-        // create another stray channel in the server.
-        await interaction.guild.channels.create({
-            name: chosenChannelName, // The name given to the channel by the user
-            type: ChannelType.GuildText, // The type of the channel created.
-            // Since "text" is the default channel created, this could be ommitted
-        });
-        // Notice how we are creating a channel in the list of channels
-        // of the server. This will cause the channel to spawn at the top
-        // of the channels list, without belonging to any categories (more on that later)
+// Check if this channel where the command was used is stray
+if (!interaction.channel.parent) {
+	// If the channel where the command was used is stray,
+	// create another stray channel in the server.
+	await interaction.guild.channels.create({
+		name: chosenChannelName, // The name given to the channel by the user
+		type: ChannelType.GuildText, // The type of the channel created.
+		// Since "text" is the default channel created, this could be ommitted
+	});
+	// Notice how we are creating a channel in the list of channels
+	// of the server. This will cause the channel to spawn at the top
+	// of the channels list, without belonging to any categories (more on that later)
 
-        // If we managed to create the channel, edit the initial response with
-        // a success message
-        await interaction.editReply({
-            content: 'Your channel was successfully created!',
-        });
-        return;
-    }
+	// If we managed to create the channel, edit the initial response with
+	// a success message
+	await interaction.editReply({
+		content: 'Your channel was successfully created!',
+	});
+	return;
+}
 
-    // Check if this channel where the command was used belongs to a category
-    if (interaction.channel.parent) {
-        // If the channel where the command belongs to a category,
-        // create another channel in the same category.
-        await interaction.channel.parent.children.create({
-            name: chosenChannelName, // The name given to the channel by the user
-            type: ChannelType.GuildText, // The type of the channel created.
-            // Since "text" is the default channel created, this could be ommitted
-        });
+// Check if this channel where the command was used belongs to a category
+if (interaction.channel.parent) {
+	// If the channel where the command belongs to a category,
+	// create another channel in the same category.
+	await interaction.channel.parent.children.create({
+		name: chosenChannelName, // The name given to the channel by the user
+		type: ChannelType.GuildText, // The type of the channel created.
+		// Since "text" is the default channel created, this could be ommitted
+	});
 
-        // If we managed to create the channel, edit the initial response with
-        // a success message
-        await interaction.editReply({
-            content: 'Your channel was successfully created in the same category!',
-        });
-        return;
-    }
-} catch (error) {
+	// If we managed to create the channel, edit the initial response with
+	// a success message
+	await interaction.editReply({
+		content: 'Your channel was successfully created in the same category!',
+	});
+	return;
+}
 
 // ...
-// no code changes past this point
+// rest of the code unchanged
 // ...
 ```
 
@@ -193,21 +190,21 @@ Let's go through this bit by bit.
 
 > _if (!interaction.channel.parent) { (line 45)_
 
-First, we are checking if the channel where the command was used doesn't have a [parent](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel), which would mean they are not nested within a category. If this check succeeds, then this is a stray channel and we can reuse our previous code to create another stray channel. Do note that we end this if check with a return statement. More on that is below.
+First, we are checking if the channel where the command was used doesn't have a [parent](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel), which would mean they are not nested within a [category](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel). If this check succeeds, then this is a stray channel and we can reuse our previous code to create another stray channel. Do note that we end this if check with a `return` statement. More on that is below.
 
 > _if (interaction.channel.parent) { (line 66)_
 
-Now we are checking if the channel where the command was used does have a [parent](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel), meaning they are nested in a category. This could very much be an _else_ block or removed entirely, since the previous _if check_ ends with a _return_ statement. **Feel free to tweak this in your code yourself, the check is only there for educational purposes.**
+Now we are checking if the channel where the command was used does have a [parent](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel), meaning they are nested in a [category](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel).
 
 > _await interaction.channel.parent.children.create({ (line 69)_
 
-Since the channel where the command was used does have a [parent](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel), we need to create our channel inside that same category. For that, we need to first access the [children](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannelChildManager) of that category and then create our channel within.
+Since the channel where the command was used does have a [parent](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel), we need to create our channel inside that same [category](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel). For that, we need to first access the [children](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannelChildManager) of that category and then create our channel within.
 
-Now that we are handling both cases for stray channels and nested channels, let's switch gears for a moment and talk about Threads before we proceed to Voice Channels, Categories, and Roles.
+Now that we are handling both cases for stray channels and nested channels, let's switch gears for a moment and talk about Threads before we proceed to Voice Channels, [Categories](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel), and Roles.
 
 ## Create a thread with a dynamic name
 
-Starting a thread is about as simple as creating a channel, all you need is either a message or a channel that will host the thread. Because threads live inside a channel, regardless of using a message as a starting point or not, you don't need to care for categories.
+Starting a thread is about as simple as creating a channel, all you need is either a message or a channel that will host the thread. Because threads live inside a channel, regardless of using a message as a starting point or not, you don't need to care for [categories](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel).
 
 ```js
 // Importing SlashCommandBuilder is required for every slash command
@@ -329,10 +326,8 @@ module.exports = {
 
 Alright, few key points with this code:
 
--   We are now storing the [message](https://discord.js.org/#/docs/discord.js/main/class/Message) sent as a reply to the interaction in the constant 'interactionReplied' (line 25). This is done so we can refer to that [message](https://discord.js.org/#/docs/discord.js/main/class/Message) later if the user requested to use our message as a parent to the thread we are going to [create](https://discord.js.org/#/docs/discord.js/main/class/Message?scrollTo=startThread) (line 73).
+-   We are now storing the [message](https://discord.js.org/#/docs/discord.js/main/class/Message) sent as a reply to the interaction in the constant `interactionReplied` (line 25). This is done so we can refer to that [message](https://discord.js.org/#/docs/discord.js/main/class/Message) later if the user requested to use our message as a parent to the thread we are going to [create](https://discord.js.org/#/docs/discord.js/main/class/Message?scrollTo=startThread) (line 73).
 -   We also handle the case that the user might not want to create a thread on the message itself, so an orphaned thread is created in the channel where the command was used instead.
-
-Just like with the checks for messages belonging to categories in the previous lesson, here we also make polar opposite checks (lines 42 and 52; lines 55 and 83; lines 58 and 70) where we could instead use else or nothing at all, considering the previous check already calls return on a positive result. **Feel free to tweak this in your own code, these additional checks are only there for educational purposes.**
 
 ## Create a voice channel that is nested in the parent category (when there is one)
 
@@ -434,11 +429,11 @@ module.exports = {
 
 [_createvoicechannel.js_](https://github.com/TheYuriG/blog_lessons/blob/master/discord_create_channels/commands/createvoicechannel.js)
 
-A few tweaks were made, variables were renamed, comments were updated, and error messages were updated, but the process isn't much different from creating a text channel. One of the few features that Voice Channels have over Text Channels is the ability to limit the number of users it can hold at once. Let's tweak that now?
+A few tweaks were made, variables were renamed, comments were updated, and error messages were updated, but the process isn't much different from creating a text channel. One of the few features that Voice Channels have over Text Channels is the ability to limit the number of users it can hold at once. Let's take a look at how to do that now.
 
 ## Create a voice channel that has a maximum number of concurrent users
 
-One of the exclusive features that voice channels have over other channels is the ability to limit the number of users that can use it at the same time. To set this number, all you gotta do is pass in an integer for the userLimit key when creating a voice channel.
+One of the exclusive features that voice channels have over other channels is the ability to [limit](https://discord.js.org/#/docs/discord.js/main/class/VoiceChannel?scrollTo=userLimit) the number of users that can use it at the same time. To set this number, all you gotta do is pass in an integer for the [userLimit](https://discord.js.org/#/docs/discord.js/main/class/VoiceChannel?scrollTo=userLimit) key when creating a voice channel.
 
 ```js
 // ...
@@ -494,9 +489,9 @@ Passing _undefined_ to the [userLimit](https://discord.js.org/#/docs/discord.js/
 
 ## Creating Categories
 
-As mentioned in the previous lessons, Categories are the parents of some channels. Not all channels belong to a Category (the ones that don't, are referred to here as "stray channels").
+As mentioned in the previous lessons, Categories are the parents of some channels. Not all channels belong to a Category (the ones that don't, are referred as "stray channels").
 
-Categories exist for primarily two reasons: Organizing channels within a certain topic and quickly syncing the permissions of all channels within it. They also are very simple to create, even simpler than Voice Channels or Text Channels, since the number of configuration options for them is so limited.
+Categories exist for primarily two reasons: Organizing channels within a certain topic and quickly syncing the permissions of all channels within it. They also are very simple to create, even simpler than Voice Channels or Text Channels, since the number of configuration options for them is limited.
 
 Let's modify the Text Channel file a bit and then talk about the differences between them and Categories:
 
@@ -537,7 +532,7 @@ await interaction.guild.channels.create({
 
 [_createcategory.js_](https://github.com/TheYuriG/blog_lessons/blob/master/discord_create_channels/commands/createcategory.js)
 
-As you probably noticed if you paid attention to the Text Channel with Dynamic Names lesson, not much was changed. We have renamed our variable, updated the command and the option name, and changed the type of channel being created to [GuildCategory](https://discord-api-types.dev/api/discord-api-types-v10/enum/ChannelType#GuildCategory). Simple, right? But there is not much use in having empty categories, so let's populate our newly created category with some channels now.
+As you probably noticed if you paid attention to the [Create a Text Channel with Dynamic Names](#creating-a-text-channel-with-a-dynamic-name) lesson, not much was changed. We have renamed our variable, updated the command and the [option](https://discord.js.org/#/docs/discord.js/main/typedef/CommandInteractionOption) name, and changed the type of channel being created to [GuildCategory](https://discord-api-types.dev/api/discord-api-types-v10/enum/ChannelType#GuildCategory). Simple, right? But there is not much use in having empty categories, so let's populate our newly created category with some channels now.
 
 ## Creating a category that nests other types of channels
 
@@ -697,7 +692,7 @@ Now that we know how to create a role, how about we learn how to create a colore
 
 ## Creating a colored role
 
-Discord roles can have any color you want. Discord even provides us with some colors themselves that they have standardized. We will both offer to use Discord's standard color selection, while also allowing users to customize exactly the color they want for the role.
+Discord roles can have any color you want. Discord even provides us with some colors they have standardized. We will both offer to use Discord's standard color selection, while also allowing users to customize exactly the color they want for the role, using hex codes for RGB colors.
 
 ```js
 // ...
@@ -777,7 +772,7 @@ Once again, let's go through each bit of code individually.
 
 > _.setName('rolecolor') (line 20)_
 
-The first of the [options](https://discord.js.org/#/docs/discord.js/main/typedef/RoleCreateOptions) we added is _rolecolor_. This option has 25 choices with colors that were standardized by Discord on their role color selection and their brand color palette. This is the easiest way for users to pick a color without needing to find a specific hex code.
+The first of the [options](https://discord.js.org/#/docs/discord.js/main/typedef/RoleCreateOptions) we added is _rolecolor_. This [option](https://discord.js.org/#/docs/discord.js/main/typedef/CommandInteractionOption) has 25 choices with colors that were standardized by Discord on their role color selection and their brand color palette. This is the easiest way for users to pick a color without needing to find a specific hex code.
 
 > _.setName('customrolecolor') (line 54)_
 
@@ -793,11 +788,11 @@ You might have noticed that we have those strict limiters in place. This is beca
 > interaction.options.getString('rolecolor') ??
 > undefined; (lines 79 to 82)_
 
-If you noticed that we mention that _customrolecolor_ overrides _rolecolor_ on line 56, this is the reason why. Since a single role can't have two colors, we need to prioritize one of the inputs over the other and since it takes more effort to find a custom RGB hex code, we will assume that the user would rather use that color instead, in case they picked a _rolecolor_ by mistake (or intentionally, since some users enjoy trying to break things just because they can). Here we use the [Javascript Nullish Coalescing](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing) operator "??" to check if the user provided any custom value. If they didn't, then we check if they picked one of Discord's standard colors. If they also didn't, then we set the color as _undefined_, so a colorless role can be created as the default fallback.
+If you noticed that we mention that `customrolecolor` overrides `rolecolor` on line 56, this is the reason why. Since a single role can't have two colors, we need to prioritize one of the inputs over the other and since it takes more effort to find a custom RGB hex code, we will assume that the user would rather use that color instead, in case they picked a `rolecolor` by mistake (or intentionally, since some users enjoy trying to break things just because they can). Here we use the [Javascript Nullish Coalescing](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing) operator `??` to check if the user provided any custom value. If they didn't, then we check if they picked one of Discord's standard colors. If they also didn't, then we set the color as `undefined`, so a colorless role can be created as the default fallback.
 
 > _color: chosenRoleColor, (line 91)_
 
-Finally, we use either the _customrolecolor_ or the _rolecolor_ or _undefined_ to set the color (or no color) for the role we will be creating.
+Finally, we use either the `customrolecolor` or the `rolecolor` or `undefined` to set the color (or no color) for the role we will be creating.
 
 Now we have a role and the role can have a color, but what's the use of a role that no one possesses? Let's grant this role to some users.
 
@@ -892,17 +887,17 @@ Let's break down this code into smaller chunks again.
 > _// Member that should get the role
 > .addMemberOption((option) => (lines 61 and 62)_
 
-This option allows the user to select a member that will receive the role, once it has been created. This will not ping them or notify them in any way.
+This [option](https://discord.js.org/#/docs/discord.js/main/typedef/CommandInteractionOption) allows the user to select a member that will receive the role, once it has been created. This will not ping them or notify them in any way.
 
 > _// Grant role to the member using the command
 > .addBooleanOption((option) => (lines 68 and 69)_
 
-This option was added to allow the person using the command to get the role added to them after being created if they select true when using the command.
+This [option](https://discord.js.org/#/docs/discord.js/main/typedef/CommandInteractionOption) was added to allow the person using the command to get the role added to them after being created if they select `true` when using the command.
 
 > _const memberNeedingRole = interaction.options.getMember('membertoreceiverole');
 > const grantRoleToSelf = interaction.options.getBoolean('grantroletocommanduser') ?? false (lines 96 and 97)_
 
-Fetches the user input from the options mentioned above. Note how grantRoleToSelf will default to false if the user doesn't select an option. This means that the only way for the user to be granted the role they have created is by manually selecting true when using the command.
+Fetches the user input from the [options](https://discord.js.org/#/docs/discord.js/main/typedef/CommandInteractionOption) mentioned above. Note how `grantRoleToSelf` will default to false if the user doesn't select an [option](https://discord.js.org/#/docs/discord.js/main/typedef/CommandInteractionOption). This means that the only way for the user to be granted the role they have created is by manually selecting `true` when using the command.
 
 > _if (grantRoleToSelf == true) { (line 110)_
 
@@ -918,6 +913,6 @@ Check if the member provided is the same person as the user that triggered the c
 
 > _if (interaction.member.id !== memberNeedingRole.id || grantRoleToSelf == false) { (line 137)_
 
-If the member provided is different than the user triggering the command or if a member was provided and the user didn't request to have the role added to themselves with the other option, grant the member to have the role.
+If the member provided is different than the user triggering the command or if a member was provided and the user didn't request to have the role added to themselves with the other [option](https://discord.js.org/#/docs/discord.js/main/typedef/CommandInteractionOption), grant the member to have the role.
 
 That was quite a bit of code we added and with that, we have also covered an edge case where users can try to give themselves the same role twice. Roles are very complex entities and there is a lot more that can be done with them, like setting up additional permissions and updating them post-creation, but that's a lesson for another day.
