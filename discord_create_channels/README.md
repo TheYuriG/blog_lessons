@@ -127,7 +127,7 @@ await interaction.guild.channels.create({
 
 [_createchannel.js_](https://github.com/TheYuriG/blog_lessons/blob/master/discord_create_channels/commands/createchannel.js)
 
-A small note here: [Discord has a visual limit of around 25 characters for channels on the sidebar](https://discord.com/moderation/208-channel-categories-and-names), but they don't define an actual hard limit for Channel names and expect users to have common sense. If you choose to override the 25-character limit in line 15, please ensure there is another limit in place to stop users from creating absurdly long Channel names. [Avoid giving them enough rope to hang themselves](https://www.collinsdictionary.com/dictionary/english/give-someone-enough-rope-to-hang-himself-or-herself).
+A small note here: [Discord has a visual limit of around 25 characters for channels on the sidebar](https://discord.com/moderation/208-channel-categories-and-names), but they don't define an actual hard limit for Channel names and expect users to have common sense. If you choose to override the 25-character limit in [line 15](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createchannel.js#L15), please ensure there is another limit in place to stop users from creating absurdly long Channel names. [Avoid giving them enough rope to hang themselves](https://www.collinsdictionary.com/dictionary/english/give-someone-enough-rope-to-hang-himself-or-herself).
 
 After saving your file, reloading your bot, and [redeploying your commands](https://discordjs.guide/creating-your-bot/command-deployment.html#command-registration), you now have a command that can quickly create a new [Text Channel](https://discord.js.org/#/docs/discord.js/main/class/TextChannel). Neat, huh? But we are still creating stray Channels at the top of the Channel list. Let's change that now.
 
@@ -188,15 +188,15 @@ if (interaction.channel.parent) {
 
 Let's go through this bit by bit.
 
-> _if (!interaction.channel.parent) { (line 45)_
+> _if (!interaction.channel.parent) { ([line 45](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createchannelincategory.js#L45))_
 
 First, we are checking if the Channel where the command was used doesn't have a [parent](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel), which would mean they are not nested within a [Category](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel). If this check succeeds, then this is a stray Channel and we can reuse our previous code to create another stray Channel. Do note that we end this if check with a `return` statement. More on that is below.
 
-> _if (interaction.channel.parent) { (line 66)_
+> _if (interaction.channel.parent) { ([line 66](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createchannelincategory.js#L66))_
 
 Now we are checking if the Channel where the command was used does have a [parent](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel), meaning they are nested in a [Category](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel).
 
-> _await interaction.channel.parent.children.create({ (line 69)_
+> _await interaction.channel.parent.children.create({ ([line 69](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createchannelincategory.js#L69))_
 
 Since the Channel where the command was used does have a [parent](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel), we need to create our Channel inside that same [Category](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel). For that, we need to first access the [children](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannelChildManager) of that [Category](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel) and then create our Channel within.
 
@@ -326,7 +326,7 @@ module.exports = {
 
 Alright, few key points with this code:
 
--   We are now storing the [message](https://discord.js.org/#/docs/discord.js/main/class/Message) sent as a reply to the interaction in the constant `interactionReplied` (line 25). This is done so we can refer to that [message](https://discord.js.org/#/docs/discord.js/main/class/Message) later if the user requested to use our message as a parent to the [Thread](https://discord.js.org/#/docs/discord.js/main/class/ThreadChannel) we are going to [create](https://discord.js.org/#/docs/discord.js/main/class/Message?scrollTo=startThread) (line 73).
+-   We are now storing the [message](https://discord.js.org/#/docs/discord.js/main/class/Message) sent as a reply to the interaction in the constant `interactionReplied` ([line 25](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createthread.js#L25)). This is done so we can refer to that [message](https://discord.js.org/#/docs/discord.js/main/class/Message) later if the user requested to use our message as a parent to the [Thread](https://discord.js.org/#/docs/discord.js/main/class/ThreadChannel) we are going to [create](https://discord.js.org/#/docs/discord.js/main/class/Message?scrollTo=startThread) ([line 73](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createthread.js#L73)).
 -   We also handle the case that the user might not want to create a [Thread](https://discord.js.org/#/docs/discord.js/main/class/ThreadChannel) on the message itself, so an orphaned [Thread](https://discord.js.org/#/docs/discord.js/main/class/ThreadChannel) is created in the [Channel](https://discord.js.org/#/docs/discord.js/main/class/BaseChannel) where the command was used instead.
 
 ## Create a Voice Channel that is nested in the parent Category (when there is one)
@@ -477,11 +477,11 @@ One of the exclusive features that [Voice Channels](https://discord.js.org/#/doc
 
 [_createvoicewithuserlimit.js_](https://github.com/TheYuriG/blog_lessons/blob/master/discord_create_channels/commands/createvoicewithuserlimit.js)
 
-There are a few key points that need to be talked about. The first of them is that we are not requiring the limit to be set (line 30). This allows the user to set a limit if they want but also allows the Channel to be unlimited if they don't.
+There are a few key points that need to be talked about. The first of them is that we are not requiring the limit to be set ([line 30](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createvoicewithuserlimit.js#L30)). This allows the user to set a limit if they want but also allows the Channel to be unlimited if they don't.
 
 > _const voiceChannelUserLimit = interaction.options.getInteger('voiceuserlimit') ?? undefined;_
 
-To avoid this causing an error when creating the [Voice Channel](https://discord.js.org/#/docs/discord.js/main/class/VoiceChannel), we check (in line 49) if a value was passed and, if .getInteger() returns us null, then then the [Javascript Nullish Coalescence](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing) operator "??" will set the value to undefined.
+To avoid this causing an error when creating the [Voice Channel](https://discord.js.org/#/docs/discord.js/main/class/VoiceChannel), we check ([line 49](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createvoicewithuserlimit.js#L49)) if a value was passed and, if .getInteger() returns us null, then then the [Javascript Nullish Coalescence](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing) operator `??` will set the value to `undefined`.
 
 > _userLimit: voiceChannelUserLimit_
 
@@ -603,11 +603,11 @@ await newlyCreatedCategory.children.create({
 
 You should be fairly familiar with what's happening here by this point if you have been following along. We are requiring the user to provide us a name for the [Text Channel](https://discord.js.org/#/docs/discord.js/main/class/TextChannel) and the [Voice Channel](https://discord.js.org/#/docs/discord.js/main/class/VoiceChannel), we are then fetching that input and using it to create them nested within the [Category](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel) we created. There are only two points that I think it's important to go through in more detail:
 
-> _const newlyCreatedCategory = await interaction.guild.channels.create({ (line 65)_
+> _const newlyCreatedCategory = await interaction.guild.channels.create({ ([line 65](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createcategorywithnestedchannels.js#L65))_
 
 We are now fetching the [Category](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel) and storing it to a constant, so it can be used to nest the newly created [Text](https://discord.js.org/#/docs/discord.js/main/class/TextChannel) and [Voice Channels](https://discord.js.org/#/docs/discord.js/main/class/VoiceChannel).
 
-> _await newlyCreatedCategory.children.create({ (lines 74 and 81)_
+> _await newlyCreatedCategory.children.create({ (lines [74](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createcategorywithnestedchannels.js#L74) and [81](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createcategorywithnestedchannels.js#L81))_
 
 Since we now have a [Category](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannel), we don't need to transverse through the [interaction](https://discord.js.org/#/docs/discord.js/main/class/CommandInteraction), then the [guild](https://discord.js.org/#/docs/discord.js/main/class/Guild), and then the [channels](https://discord.js.org/#/docs/discord.js/main/class/GuildChannelManager) to create our Channels, we can just use the [Category](https://discord-api-types.dev/api/discord-api-types-v10/enum/ChannelType#GuildCategory)'s [children](https://discord.js.org/#/docs/discord.js/main/class/CategoryChannelChildManager) and nest our Channels inside that.
 
@@ -686,7 +686,7 @@ module.exports = {
 
 > _await interaction.guild.roles.create({_
 
-To create a role, you need to access the [roles](https://discord.js.org/#/docs/discord.js/main/class/RoleManager) of a server and then create a new [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) there. Creating a [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) can take some additional [configuration](https://discord.js.org/#/docs/discord.js/main/typedef/RoleCreateOptions), but all settings are optional (a [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) with no configuration will be called "new role" and have no color). As in previous lessons, we create a [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) that has a name provided by the user and, after that [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) is created, we edit the initial message with a success message (line 46).
+To create a role, you need to access the [roles](https://discord.js.org/#/docs/discord.js/main/class/RoleManager) of a server and then create a new [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) there. Creating a [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) can take some additional [configuration](https://discord.js.org/#/docs/discord.js/main/typedef/RoleCreateOptions), but all settings are optional (a [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) with no configuration will be called "new role" and have no color). As in previous lessons, we create a [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) that has a name provided by the user and, after that [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) is created, we edit the initial message with a success message ([line 46](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createrole.js#L46)).
 
 Now that we know how to create a role, how about we learn how to create a colored role?
 
@@ -770,27 +770,27 @@ color: chosenRoleColor,
 
 Once again, let's go through each bit of code individually.
 
-> _.setName('rolecolor') (line 20)_
+> _.setName('rolecolor') ([line 20](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createcoloredrole.js#L20))_
 
 The first of the [options](https://discord.js.org/#/docs/discord.js/main/typedef/RoleCreateOptions) we added is _rolecolor_. This [option](https://discord.js.org/#/docs/discord.js/main/typedef/CommandInteractionOption) has 25 choices with colors that were standardized by Discord on their [role color](https://discord.js.org/#/docs/discord.js/main/class/Role?scrollTo=color) selection and their brand color palette. This is the easiest way for users to pick a color without needing to find a specific hex code.
 
-> _.setName('customrolecolor') (line 54)_
+> _.setName('customrolecolor') ([line 54](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createcoloredrole.js#L54))_
 
 The second [option](https://discord.js.org/#/docs/discord.js/main/typedef/RoleCreateOptions) we added is _customrolecolor_. This allows users to create a [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) with ANY color they want, by using a hex code. There are various websites that can be used to get a hex code from a color. The one I've been using for years is [RapidTables](https://www.rapidtables.com/web/color/RGB_Color.html).
 
 > _.setMinLength(8)
-> .setMaxLength(8) (lines 58 and 59)_
+> .setMaxLength(8) (lines [58](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createcoloredrole.js#L58) and [59](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createcoloredrole.js#L59))_
 
 You might have noticed that we have those strict limiters in place. This is because every RGB hex code has exactly 8 digits, the first two being "0x" which identifies that the following digits are a hexadecimal number. The next two digits are responsible for the Red, the 5th and 6th digits are responsible for the Green and the last 2 digits are responsible for the Blue.
 
 > _const chosenRoleColor =
 > interaction.options.getString('customrolecolor') ??
 > interaction.options.getString('rolecolor') ??
-> undefined; (lines 79 to 82)_
+> undefined; (lines [79](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createcoloredrole.js#L79) to [82](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createcoloredrole.js#L82))_
 
-If you noticed that we mention that `customrolecolor` overrides `rolecolor` on line 56, this is the reason why. Since a single [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) can't have two colors, we need to prioritize one of the inputs over the other and since it takes more effort to find a custom RGB hex code, we will assume that the user would rather use that color instead, in case they picked a `rolecolor` by mistake (or intentionally, since some users enjoy trying to break things just because they can). Here we use the [Javascript Nullish Coalescing](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing) operator `??` to check if the user provided any custom value. If they didn't, then we check if they picked one of Discord's standard colors. If they also didn't, then we set the color as `undefined`, so a colorless [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) can be created as the default fallback.
+If you noticed that we mention that `customrolecolor` overrides `rolecolor` on [line 56](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createcoloredrole.js#L56), this is the reason why. Since a single [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) can't have two colors, we need to prioritize one of the inputs over the other and since it takes more effort to find a custom RGB hex code, we will assume that the user would rather use that color instead, in case they picked a `rolecolor` by mistake (or intentionally, since some users enjoy trying to break things just because they can). Here we use the [Javascript Nullish Coalescing](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing) operator `??` to check if the user provided any custom value. If they didn't, then we check if they picked one of Discord's standard colors. If they also didn't, then we set the color as `undefined`, so a colorless [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) can be created as the default fallback.
 
-> _color: chosenRoleColor, (line 91)_
+> _color: chosenRoleColor, ([line 91](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createcoloredrole.js#L91))_
 
 Finally, we use either the `customrolecolor` or the `rolecolor` or `undefined` to set the color (or no color) for the [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) we will be creating.
 
@@ -885,33 +885,33 @@ if (memberNeedingRole != null) {
 Let's break down this code into smaller chunks again.
 
 > _// Member that should get the role
-> .addMemberOption((option) => (lines 61 and 62)_
+> .addMemberOption((option) => (lines [61](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createandgrantrole.js#L61) and [62](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createandgrantrole.js#L62))_
 
 This [option](https://discord.js.org/#/docs/discord.js/main/typedef/CommandInteractionOption) allows the user to select a [Member](https://discord.js.org/#/docs/discord.js/main/class/GuildMember) that will receive the role, once it has been created. This will not ping them or notify them in any way.
 
 > _// Grant role to the member using the command
-> .addBooleanOption((option) => (lines 68 and 69)_
+> .addBooleanOption((option) => (lines [68](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createandgrantrole.js#L68) and [69](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createandgrantrole.js#L69))_
 
 This [option](https://discord.js.org/#/docs/discord.js/main/typedef/CommandInteractionOption) was added to allow the person using the command to get the [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) added to them after being created if they select `true` when using the command.
 
 > _const memberNeedingRole = interaction.options.getMember('membertoreceiverole');
-> const grantRoleToSelf = interaction.options.getBoolean('grantroletocommanduser') ?? false (lines 96 and 97)_
+> const grantRoleToSelf = interaction.options.getBoolean('grantroletocommanduser') ?? false (lines [96](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createandgrantrole.js#L96) and [97](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createandgrantrole.js#L97))_
 
 Fetches the user input from the [options](https://discord.js.org/#/docs/discord.js/main/typedef/CommandInteractionOption) mentioned above. Note how `grantRoleToSelf` will default to false if the user doesn't select an [option](https://discord.js.org/#/docs/discord.js/main/typedef/CommandInteractionOption). This means that the only way for the user to be granted the [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) they have created is by manually selecting `true` when using the command.
 
-> _if (grantRoleToSelf == true) { (line 110)_
+> _if (grantRoleToSelf == true) { ([line 110](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createandgrantrole.js#L110))_
 
 Checks if the user requested to give themselves the [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) after creation and, if they did, attempt to give it to them. This, just like giving a [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) to any [Member](https://discord.js.org/#/docs/discord.js/main/class/GuildMember), is prone to fail if the bot doesn't have permission to [Manage Members](https://discord.js.org/#/docs/discord.js/main/class/GuildMemberManager) or if the [Member](https://discord.js.org/#/docs/discord.js/main/class/GuildMember) that we are trying to give the [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) already has another [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) that has higher priority than the all of bot's [Roles](https://discord.js.org/#/docs/discord.js/main/class/Role).
 
-> _if (memberNeedingRole != null) { (line 124)_
+> _if (memberNeedingRole != null) { ([line 124](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createandgrantrole.js#L124))_
 
 Check if the user provided us with a [Member](https://discord.js.org/#/docs/discord.js/main/class/GuildMember) to give the role.
 
-> _if (interaction.member.id === memberNeedingRole.id && grantRoleToSelf == true) { (line 127)_
+> _if (interaction.member.id === memberNeedingRole.id && grantRoleToSelf == true) { ([line 127](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createandgrantrole.js#L127))_
 
 Check if the [Member](https://discord.js.org/#/docs/discord.js/main/class/GuildMember) provided is the same person as the user that triggered the command and if they have previously asked to receive the [Role](https://discord.js.org/#/docs/discord.js/main/class/Role). This will only give them an error message if they asked for the [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) twice, otherwise, it will just give them the role.
 
-> _if (interaction.member.id !== memberNeedingRole.id || grantRoleToSelf == false) { (line 137)_
+> _if (interaction.member.id !== memberNeedingRole.id || grantRoleToSelf == false) { ([line 137](https://github.com/TheYuriG/blog_lessons/blob/4fc83cf7d08c20fc43cc0018d24db2eb9ff33ae1/discord_create_channels/commands/createandgrantrole.js#L137))_
 
 If the [Member](https://discord.js.org/#/docs/discord.js/main/class/GuildMember) provided is different than the user triggering the command or if a [Member](https://discord.js.org/#/docs/discord.js/main/class/GuildMember) was provided and the user didn't request to have the [Role](https://discord.js.org/#/docs/discord.js/main/class/Role) added to themselves with the other [option](https://discord.js.org/#/docs/discord.js/main/typedef/CommandInteractionOption), grant the [Member](https://discord.js.org/#/docs/discord.js/main/class/GuildMember) to have the [Role](https://discord.js.org/#/docs/discord.js/main/class/Role).
 
