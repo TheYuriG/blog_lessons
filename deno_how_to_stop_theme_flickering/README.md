@@ -66,6 +66,8 @@ scheme. Let's have a look:
 
 ```ts
 // /routes/index.tsx (but can be any page)
+import { Head } from "$fresh/runtime.ts";
+
 export default function Home() {
   return (
     <>
