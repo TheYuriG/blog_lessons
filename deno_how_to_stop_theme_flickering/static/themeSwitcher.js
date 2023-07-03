@@ -1,4 +1,3 @@
-// /static/themeSwitcher.js
 const selectedTheme = localStorage.getItem("theme");
 if (selectedTheme === null) {
   window.showDarkMode =
